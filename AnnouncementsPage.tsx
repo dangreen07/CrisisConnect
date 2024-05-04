@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 
-const AnnouncementsPage: React.FC = () => {
+export default function AnnouncementsPage() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
@@ -21,4 +21,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AnnouncementsPage;
