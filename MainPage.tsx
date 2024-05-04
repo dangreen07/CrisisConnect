@@ -1,10 +1,14 @@
+import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 
-const MainPage: React.FC = () => {
+export default function MainPage() {
   return (
     <View style={styles.container}>
-      <Text>Main Page</Text>
+      <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
+        <Text style={{fontSize:36, alignSelf: 'center'}}>Current Tasks</Text>
+      </SafeAreaView>
+      <StatusBar style="auto"/>
     </View>
   );
 };
@@ -16,5 +20,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-export default MainPage;
