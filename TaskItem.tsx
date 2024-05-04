@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, Image, Alert } from 'react-native';
 import { theme } from './Constants';
 import React from 'react';
 
@@ -14,7 +14,7 @@ const fadeOutAnimationConfig = {
     useNativeDriver: true,
 }
 
-export default function Task() {
+export default function Task( {taskName="Task Name Here"} : {taskName?: string} ) {
     const opacityValue = React.useRef(new Animated.Value(0)).current;
 
     const fadeIn = () => {
@@ -25,13 +25,28 @@ export default function Task() {
         Animated.timing(opacityValue, fadeOutAnimationConfig).start();
     }
 
+    const confirmTaskComplete = {
+        text: 'Confirm',
+        onPress: () => console.log("Confirm Pressed!"),
+    }
+
+    const cancelTaskComplete = {
+        text: 'Cancel',
+        onPress: () => console.log("Cancel Pressed!"),
+        style: 'cancel',
+    }
+
     const taskComplete = () => {
         console.log("Completed Task!");
+        Alert.alert("Check off Task", "Press Confirm to check off: " + taskName, [
+            cancelTaskComplete,
+            confirmTaskComplete,
+        ])
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Task Name Here</Text>
+            <Text style={styles.title}>{taskName}</Text>
             <Pressable
             onPressIn={fadeIn}
             onPressOut={fadeOut}
@@ -68,5 +83,6 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         resizeMode: 'contain',
+        marginRight: 10,
     }
 });
