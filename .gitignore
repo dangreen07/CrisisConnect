@@ -35,3 +35,6 @@ yarn-error.*
 *.tsbuildinfo
 
 %ProgramData%
+
+# Database info
+server/mysqlCreds.json
