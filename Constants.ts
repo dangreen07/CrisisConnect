@@ -1,5 +1,7 @@
 export const theme = {
-    backgroundColor: "white",
-    foregroundColor: "pink",
-    textColor: "black",
+    backgroundColor: "#FFF",
+    foregroundColor: "#7EE8FA",
+    textColor: "#04080F",
+    primaryColor: '#04080F',
+    navigatorColor: '#7EE8FA',
 }

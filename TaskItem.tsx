@@ -2,32 +2,21 @@ import { View, Text, StyleSheet, Pressable, Animated, Image, Alert } from 'react
 import { theme } from './Constants';
 import React from 'react';
 
-const fadeInAnimationConfig = {
-    toValue: .7,
-    duration: 100,
-    useNativeDriver: true,
-}
 
-const fadeOutAnimationConfig = {
-    toValue: 0,
-    duration: 100,
-    useNativeDriver: true,
-}
-
-export default function Task( {taskName="Task Name Here"} : {taskName?: string} ) {
-    const opacityValue = React.useRef(new Animated.Value(0)).current;
-
-    const fadeIn = () => {
-        Animated.timing(opacityValue, fadeInAnimationConfig).start();
-    };
-
-    const fadeOut = () => {
-        Animated.timing(opacityValue, fadeOutAnimationConfig).start();
+export default function Task( {taskName="G".repeat(35), taskId, reloadFunction} : {taskName?: string, taskId, reloadFunction: any} ) {
+    const completeTask = () => {
+        fetch(`http://192.168.86.101:3000/completedTask?task=${taskId}`, {
+            method: 'POST',
+        }).then(response => {
+            reloadFunction();
+        }).catch(error => {
+            console.error(error);
+        })
     }
 
     const confirmTaskComplete = {
         text: 'Confirm',
-        onPress: () => console.log("Confirm Pressed!"),
+        onPress: () => completeTask()
     }
 
     const cancelTaskComplete = {
@@ -48,8 +37,6 @@ export default function Task( {taskName="Task Name Here"} : {taskName?: string} 
         <View style={styles.container}>
             <Text style={styles.title}>{taskName}</Text>
             <Pressable
-            onPressIn={fadeIn}
-            onPressOut={fadeOut}
             onPress={taskComplete}
             style={styles.button}
             >
@@ -66,12 +53,14 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         flexDirection: "row",
         alignItems: 'center',
+        marginTop: 10,
     },
     title: {
         fontSize: 26,
         marginHorizontal: 10,
         paddingVertical: 25,
         flex: 1,
+        color: theme.textColor,
     },
     button: {
         alignItems: 'center',
