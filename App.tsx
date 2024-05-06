@@ -1,11 +1,9 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { SafeAreaView } from 'react-native';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MainPage from './MainPage';
 import AnnouncementsPage from './AnnouncementsPage';
 import { theme } from './Constants';
+import MainPageNavigator from './MainPageNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,7 +25,7 @@ export default function App() {
       <Tab.Navigator screenOptions={{
           headerShown: false,
         }}>
-        <Tab.Screen name="Main" component={MainPage} />
+        <Tab.Screen name="MainNavigator" component={MainPageNavigator} />
         <Tab.Screen name="Announcements" component={AnnouncementsPage} />
       </Tab.Navigator>
     </NavigationContainer>

@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, Pressable, Animated, Image, Alert } from 'react-native';
-import { theme } from './Constants';
+import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
+import { api, theme } from '../Constants';
 import React from 'react';
 
 
 export default function Task( {taskName="G".repeat(35), taskId, reloadFunction} : {taskName?: string, taskId, reloadFunction: any} ) {
     const completeTask = () => {
-        fetch(`http://192.168.86.101:3000/completedTask?task=${taskId}`, {
+        fetch(`${api.address}/completedTask?task=${taskId}`, {
             method: 'POST',
         }).then(response => {
             reloadFunction();
@@ -36,12 +36,12 @@ export default function Task( {taskName="G".repeat(35), taskId, reloadFunction} 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{taskName}</Text>
-            <Pressable
+            <TouchableOpacity
             onPress={taskComplete}
             style={styles.button}
             >
-                <Image style={styles.taskComplete} source={require('./assets/task-complete.png')} />
-            </Pressable>
+                <Image style={styles.taskComplete} source={require('../assets/task-complete.png')} />
+            </TouchableOpacity>
         </View>
     );
 }

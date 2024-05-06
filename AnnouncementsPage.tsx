@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import AnnouncementItem from './AnnouncementItem';
+import AnnouncementItem from './Components/AnnouncementItem';
 
 export default function AnnouncementsPage() {
   return (

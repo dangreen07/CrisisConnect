@@ -6,7 +6,6 @@ const credentials = require('./mysqlCreds.json');
 
 app.get('/getTasks', function (req: any, res: any) {
     const group_id = req.query.group;
-    console.log(group_id);
     let con = mysql.createConnection(credentials);
     con.connect(function(err: any) {
         if (err) throw err;
@@ -30,6 +29,21 @@ app.post('/completedTask', function (req:any, res:any) {
             res.status(200).send(result);
             con.end();
         });
+    });
+});
+
+app.post('/addTask', function (req: any, res: any) {
+    const task_name = req.query.name;
+    const idgroup = req.query.group;
+    let con = mysql.createConnection(credentials);
+    con.connect(function(err: any) {
+        if (err) throw err;
+        con.query(`INSERT INTO tasks (task_name, idgroups) VALUES ("${task_name}", ${idgroup})`, function (err: any, result: any, fields: any) {
+            if (err) throw err;
+            console.log(result);
+            res.status(200).send(result);
+            con.end();
+        })
     });
 });
 

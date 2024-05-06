@@ -1,36 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Image } from 'react-native';
-import TaskItem from './TaskItem';
-import { theme } from './Constants';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native';
+import TaskItem from './Components/TaskItem';
+import { api, theme } from './Constants';
+import { useIsFocused } from '@react-navigation/native';
 
-export default function MainPage() {
+export default function MainPage({navigation}) {
   const [tasks, setTasks] = useState([]);
+  const isFocused = useIsFocused();
 
   const getTasksFromAPI = () => {
     // In the real world this would connect to a cloud hosted API and not something on a local network
-    fetch("http://192.168.86.101:3000/getTasks?group=1", {
+    fetch(`${api.address}/getTasks?group=1`, {
       method: 'GET',
     }).then(response => response.json()).then(json => {
-      console.log(json);
       setTasks(json);
     }).catch(error => {
       console.error(error);
     });
   }
 
+  const addTask = () => {
+    navigation.navigate("AddTask");
+  }
+
   useEffect(() => {
     getTasksFromAPI();
-  }, []);
+  }, [isFocused]);
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
         <View style={styles.topbar}>
           <Text style={styles.title}>Current Tasks</Text>
-          <Pressable onPress={getTasksFromAPI}>
+          <TouchableOpacity style={styles.reloadButton} onPress={getTasksFromAPI}>
             <Image style={styles.reloadIcon} source={require('./assets/reload.png')} />
-          </Pressable>
+          </TouchableOpacity>
         </View>
         <ScrollView>
           {tasks.map((task) => {
@@ -39,6 +44,10 @@ export default function MainPage() {
             )
           })}
         </ScrollView>
+        <TouchableOpacity style={styles.addButton} onPress={addTask}>
+          {/* Attribution to author of add.png <a href="https://www.flaticon.com/free-icons/plus" title="plus icons">Plus icons created by srip - Flaticon</a> */}
+          <Image style={styles.addIcon} source={require("./assets/add.png")} />
+        </TouchableOpacity>
       </SafeAreaView>
       <StatusBar style="auto"/>
     </View>
@@ -62,10 +71,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 10,
   },
+  reloadButton:{
+    padding: 5,
+    marginRight: 10,
+  },
   reloadIcon: {
     width: 30,
     height: 30,
     resizeMode: 'contain',
-    marginRight: 10,
+  },
+  addButton: {
+    position: 'absolute',
+    right: 15,
+    bottom: 15,
+    backgroundColor: theme.newTaskColor,
+    padding: 20,
+    borderRadius: 40,
+  },
+  addIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: 'contain',
   }
 });

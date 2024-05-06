@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { theme } from './Constants';
+import { theme } from '../Constants';
 
 const defaultTitle: string = "Title Not Set!";
 const defaultContents: string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id libero bibendum, cursus diam eu, finibus magna. Donec volutpat tempus urna, vel ullamcorper est mollis nec. Integer id purus mollis, sollicitudin neque eu, tristique lacus. Nullam dignissim odio sem, nec hendrerit leo pellentesque ac. Curabitur ultrices sagittis tristique. Integer condimentum.";
