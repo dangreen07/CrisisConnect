@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AnnouncementsPage from './AnnouncementsPage';
 import { theme } from './Constants';
 import MainPageNavigator from './MainPageNavigator';
+import Map from './MapPage';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +28,7 @@ export default function App() {
         }}>
         <Tab.Screen name="MainNavigator" component={MainPageNavigator} />
         <Tab.Screen name="Announcements" component={AnnouncementsPage} />
+        <Tab.Screen name="Map" component={Map} />
       </Tab.Navigator>
     </NavigationContainer>
   );
