@@ -8,5 +8,5 @@ export const theme = {
 }
 
 export const api = {
-    address: "http://192.168.86.101:3000"
+    address: "http://192.168.86.101:3000" // In production would be changed to a public address
 }

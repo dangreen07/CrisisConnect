@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../Constants';
 
 const defaultTitle: string = "Title Not Set!";
-const defaultContents: string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id libero bibendum, cursus diam eu, finibus magna. Donec volutpat tempus urna, vel ullamcorper est mollis nec. Integer id purus mollis, sollicitudin neque eu, tristique lacus. Nullam dignissim odio sem, nec hendrerit leo pellentesque ac. Curabitur ultrices sagittis tristique. Integer condimentum.";
+const defaultContents: string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum nunc ligula, volutpat vel elit vitae, suscipit pharetra enim. Suspendisse tincidunt ultrices mauris, vel mollis lectus tristique sed. Mauris urna leo, facilisis eu cursus et, varius sit amet neque. Nulla ultrices arcu vel suscipit fermentum. Curabitur in tortor ac leo orci aliquam.";
 
 export default function Announcement({title = defaultTitle, contents = defaultContents}: {title?: string, contents?: string}) {
     return (
