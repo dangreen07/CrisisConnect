@@ -3,6 +3,8 @@ let express = require('express');
 require('dotenv').config();
 let app = express();
 
+app.use(express.raw({ type: '*/*', limit: '10mb' })); // Allows for recieving raw body data
+
 const credentials = {
     "host": process.env.DATABASE_HOST || "http://localhost",
     "user": process.env.DATABASE_USER || "root",
@@ -11,7 +13,7 @@ const credentials = {
     "database": process.env.DATABASE_NAME || "crisisconnect",
 }
 
- 
+
 // Tasks Subsection
 app.get('/getTasks', function (req: any, res: any) {
     const group_id = req.query.group;
@@ -71,6 +73,36 @@ app.get('/getAnnouncements', function (req: any, res: any){
             const json_output = Object.values(JSON.parse(JSON.stringify(result)));
             res.status(200).send(json_output);
             con.end();
+        });
+    });
+});
+
+// Group login section
+app.post("/groupLogin", function (req: any, res: any) {
+    const body: {groupName: string, groupPass: string} = JSON.parse(req.body);
+    let con = mysql.createConnection(credentials);
+    con.connect(function(err: any) {
+        if (err) throw err;
+        con.query(`SELECT * FROM groups WHERE group_name="${body.groupName}" AND group_password="${body.groupPass}"`, function (err: any, result: any, fields: any)
+        {
+            if(result.length != 0) {
+                // Successful login
+                const json_output: {idgroups: BigInteger, group_name: string, group_password: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
+                console.log("Successful login!");
+                res.status(200).send({
+                    successful: true,
+                    groupID: json_output[0].idgroups,
+                });
+                con.end();
+            }
+            else {
+                // Failed login attempt
+                console.log("Failed attempt!");
+                res.status(200).send(JSON.stringify({
+                    successful: false
+                }));
+                con.end();
+            }
         });
     });
 });
