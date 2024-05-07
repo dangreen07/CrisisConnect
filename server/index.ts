@@ -1,19 +1,17 @@
 let mysql = require('mysql');
 let express = require('express');
+require('dotenv').config();
 let app = express();
 
-// Credentials file format:
-/* {
-    "host":"HOST_IP",
-    "user":"DATABASE_USER",
-    "password":"DATABASE_PASSWORD",
-    "port": "DATABASE_PORT",
-    "database": "DATABASE_NAME"
-} */
-//const credentials = require('./mysqlCreds.json'); // Credentials file ommited from github for security reasons
-const credentials = require("./MyMysqlCreds.json"); // Switch to this database for development with development(free) database
+const credentials = {
+    "host": process.env.DATABASE_HOST || "http://localhost",
+    "user": process.env.DATABASE_USER || "root",
+    "password": process.env.DATABASE_PASSWORD || "password",
+    "port": process.env.DATABASE_PORT || 3306,
+    "database": process.env.DATABASE_NAME || "crisisconnect",
+}
 
-
+ 
 // Tasks Subsection
 app.get('/getTasks', function (req: any, res: any) {
     const group_id = req.query.group;
