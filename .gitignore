@@ -38,3 +38,4 @@ yarn-error.*
 
 # Database info
 server/mysqlCreds.json
+server/MyMysqlCreds.json

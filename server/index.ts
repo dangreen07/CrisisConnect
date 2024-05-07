@@ -10,7 +10,9 @@ let app = express();
     "port": "DATABASE_PORT",
     "database": "DATABASE_NAME"
 } */
-const credentials = require('./mysqlCreds.json'); // Credentials file ommited from github for security reasons
+//const credentials = require('./mysqlCreds.json'); // Credentials file ommited from github for security reasons
+const credentials = require("./MyMysqlCreds.json"); // Switch to this database for development with development(free) database
+
 
 // Tasks Subsection
 app.get('/getTasks', function (req: any, res: any) {
