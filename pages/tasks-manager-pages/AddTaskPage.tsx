@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, StyleSheet, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { api, theme } from './Constants';
+import { api, theme } from '../../Constants';
 import { LogBox } from 'react-native';
 
 LogBox.ignoreLogs([

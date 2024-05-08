@@ -138,5 +138,35 @@ app.post("/login", function (req: any, res: any) {
     });
 });
 
+app.get("/userInfo", function (req: any, res: any) {
+    const sessionID = req.query.session_id;
+    console.log(sessionID);
+    let con = mysql.createConnection(credentials);
+    con.connect(function(err: any) {
+        if (err) throw err;
+        con.query(`SELECT first_name, last_name, idgroups FROM users WHERE session_id="${sessionID}"`, function (err: any, result: any, fields: any) {
+            if (err) throw err;
+            if(result.length != 0) {
+                // Successful Login
+                const json_output: {first_name: string, last_name: string, idgroups: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
+                console.log(json_output);
+                res.send({
+                    successful: true,
+                    first_name: json_output[0].first_name,
+                    last_name: json_output[0].last_name,
+                    group_id: json_output[0].idgroups
+                });
+                con.end();
+            }
+            else {
+                res.send({
+                    successful: false
+                })
+                con.end();
+            }
+        });
+    });
+});
+
 // Start Listening
 app.listen(3000);

@@ -1,9 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native';
-import TaskItem from './Components/TaskItem';
-import { api, theme } from './Constants';
+import TaskItem from '../../Components/TaskItem';
+import { api, theme } from '../../Constants';
 import { useIsFocused } from '@react-navigation/native';
+
+const addSymbol = require("../../assets/add.png");
+const reloadSymbol = require('../../assets/reload.png');
 
 export default function MainPage({navigation}) {
   const [tasks, setTasks] = useState([]);
@@ -34,7 +37,7 @@ export default function MainPage({navigation}) {
         <View style={styles.topbar}>
           <Text style={styles.title}>Current Tasks</Text>
           <TouchableOpacity style={styles.reloadButton} onPress={getTasksFromAPI}>
-            <Image style={styles.reloadIcon} source={require('./assets/reload.png')} />
+            <Image style={styles.reloadIcon} source={reloadSymbol} />
           </TouchableOpacity>
         </View>
         <ScrollView>
@@ -46,7 +49,7 @@ export default function MainPage({navigation}) {
         </ScrollView>
         <TouchableOpacity style={styles.addButton} onPress={addTask}>
           {/* Attribution to author of add.png <a href="https://www.flaticon.com/free-icons/plus" title="plus icons">Plus icons created by srip - Flaticon</a> */}
-          <Image style={styles.addIcon} source={require("./assets/add.png")} />
+          <Image style={styles.addIcon} source={addSymbol} />
         </TouchableOpacity>
       </SafeAreaView>
       <StatusBar style="auto"/>

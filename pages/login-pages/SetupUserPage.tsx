@@ -1,23 +1,69 @@
-import { useState } from "react";
-import { api, theme } from "./Constants";
-import { View, StyleSheet, Text, SafeAreaView, TextInput, TouchableOpacity } from "react-native";
+import { SafeAreaView, View, StyleSheet, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { api, theme } from '../../Constants';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CONSTANTS, JSHash } from 'react-native-hash';
-import uuid from 'react-native-uuid';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const hashAlgorithm = CONSTANTS.HashAlgorithms.sha256; // Used to ensure no password sent over internet. Note: Same hashing function as bitcoin uses
 
-export default function IndividualLoginPage(ReCheckLogin) {
+export default function SetupUser({ navigation }) {
+    const [groupName, setGroupName] = useState(""); // Get input for group name
+    const [groupPassword, setGroupPassword] = useState(""); // Get input for password
+    const [success, setSuccess] = useState(true); // Used for incorrect name/password info
+    const [groupId, setGroupID] = useState(BigInt(-1));
+
+    // Individual login
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [loggedIn, setLoggedIn] = useState(false);
 
-    const saveSessionID = async (sessionID: string) => {
+    const checkLoggedIn = async () => {
         try {
-            await AsyncStorage.setItem("sessionID", sessionID);
-            ReCheckLogin();
+        const value = await AsyncStorage.getItem("sessionID");
+        if (value !== null) {
+            // Value previously stored
+            if (value !== "removed") {
+                setLoggedIn(true);
+                navigation.replace("MainSection");
+            }
+            else {
+                setLoggedIn(false);
+            }
+        }
+        else {
+            // Value never stored (definitely know not logged in)
+            setLoggedIn(false);
+        }
+        } catch (e) {
+        // Error reading value
+        }
+    }
+
+    useEffect(() => {
+        checkLoggedIn();
+    }, [loggedIn]);
+
+
+    const saveSessionID = (sessionID: string) => {
+        try {
+            AsyncStorage.setItem("sessionID", sessionID).then(() => {
+                navigation.replace('MainSection'); // Used replace to ensure that the user cannot go back with a swipe or back button
+            });
         } catch (e) {
             // Error reading value
             console.error(e);
+        }
+    }
+
+    const checkIfGroupAlreadyLoggedIn = async () => {
+        try {
+            const value = BigInt(await AsyncStorage.getItem("groupId"));
+            if (value !== null) {
+                // Value previously stored
+                setGroupID(value);
+            }
+        } catch (e) {
+            // Error reading value
         }
     }
 
@@ -36,7 +82,7 @@ export default function IndividualLoginPage(ReCheckLogin) {
             // TODO: Handle Server Response
             if(json["successful"] == true) {
                 // Successful login
-                console.log("Successful Login!");
+                console.log(json);
                 saveSessionID(json["session_id"]);
             }
             else {
@@ -55,6 +101,15 @@ export default function IndividualLoginPage(ReCheckLogin) {
         .catch(e => console.log(e));
     }
 
+    useEffect(() => {
+        // Runs on start of page
+        checkIfGroupAlreadyLoggedIn();
+    }, []);
+
+    const signup = () => {
+        console.log("Signup!");
+    }
+
     return (
         <View style={styles.container}>
             <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
@@ -68,9 +123,12 @@ export default function IndividualLoginPage(ReCheckLogin) {
                 <TouchableOpacity style={styles.submitButton} onPress={attemptLogin}>
                         <Text style={{fontSize: 18,}}>Login</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.submitButton} onPress={signup}>
+                        <Text style={{fontSize: 18,}}>Signup</Text>
+                </TouchableOpacity>
             </SafeAreaView>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({

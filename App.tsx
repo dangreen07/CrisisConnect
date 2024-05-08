@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import AnnouncementsPage from './AnnouncementsPage';
-import { theme } from './Constants';
-import MainPageNavigator from './MainPageNavigator';
-import Map from './MapPage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SetupUser from './SetupUserPage';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import SetupUser from './pages/login-pages/SetupUserPage';
+import MainAppNavigator from './pages/MainAppNavigator';
+import { theme } from './Constants';
+import Signup from './pages/login-pages/GroupLoginPage';
+import GroupSignin from './pages/login-pages/GroupLoginPage';
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 const MyTheme = {
   ...DefaultTheme,
@@ -16,51 +16,22 @@ const MyTheme = {
     ...DefaultTheme.colors,
     background: theme.backgroundColor,
     text: theme.textColor,
-    primary: theme.primaryColor, 
+    primary: theme.primaryColor,
     card: theme.navigatorColor,
     border: theme.backgroundColor,
   },
 };
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  const checkLoggedIn = async () => {
-    try {
-      const value = await AsyncStorage.getItem("sessionID");
-      if (value !== null) {
-        // Value previously stored
-        setLoggedIn(true);
-      }
-      else {
-        // Value never stored (definitely know not logged in)
-        setLoggedIn(false);
-      }
-    } catch (e) {
-      // Error reading value
-    }
-  }
-
-  useEffect(() => {
-    checkLoggedIn();
-  }, []);
-
-  if(!loggedIn){
-    return (
-      <SetupUser ReCheckLogin={checkLoggedIn} />
-    )
-  }
-  else {
-    return (
-      <NavigationContainer theme={MyTheme}>
-        <Tab.Navigator screenOptions={{
+  return (
+    <NavigationContainer theme={MyTheme}>
+      <Stack.Navigator screenOptions={{
             headerShown: false,
           }}>
-          <Tab.Screen name="MainNavigator" component={MainPageNavigator} />
-          <Tab.Screen name="Announcements" component={AnnouncementsPage} />
-          <Tab.Screen name="Map" component={Map} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    );
-  }
+        <Stack.Screen name="Login" component={SetupUser} />
+        <Stack.Screen name="Signup" component={GroupSignin} />
+        <Stack.Screen name="MainSection" component={MainAppNavigator} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  )
 };

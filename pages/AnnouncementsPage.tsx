@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
-import AnnouncementItem from './Components/AnnouncementItem';
-import { api } from './Constants';
+import AnnouncementItem from '../Components/AnnouncementItem';
+import { api } from '../Constants';
 import { useIsFocused } from '@react-navigation/native';
 
 export default function AnnouncementsPage({navigation}) {
