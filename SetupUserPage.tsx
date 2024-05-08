@@ -2,9 +2,9 @@ import { SafeAreaView, View, StyleSheet, Text, TextInput, TouchableOpacity, Aler
 import { api, theme } from './Constants';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import IndividualLoginPage from './IndividualLoginPage';
 
-
-export default function SetupUser() {
+export default function SetupUser(ReCheckLogin) {
     const [groupName, setGroupName] = useState(""); // Get input for group name
     const [groupPassword, setGroupPassword] = useState(""); // Get input for password
     const [success, setSuccess] = useState(true); // Used for incorrect name/password info
@@ -80,9 +80,7 @@ export default function SetupUser() {
     }
     else {
         return (
-            <View style={styles.container}>
-                <Text>TODO: Add individual login feature</Text>
-            </View>
+            <IndividualLoginPage ReCheckLogin={ReCheckLogin} />
         )
     }
     
@@ -104,6 +102,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         flex: 1,
         borderWidth: 1,
+        borderRadius: 5,
     },
     inputRow: {
         flexDirection: 'row',

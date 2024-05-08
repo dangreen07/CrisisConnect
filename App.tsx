@@ -47,7 +47,7 @@ export default function App() {
 
   if(!loggedIn){
     return (
-      <SetupUser />
+      <SetupUser ReCheckLogin={checkLoggedIn} />
     )
   }
   else {

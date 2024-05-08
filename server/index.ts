@@ -85,6 +85,7 @@ app.post("/groupLogin", function (req: any, res: any) {
         if (err) throw err;
         con.query(`SELECT * FROM groups WHERE group_name="${body.groupName}" AND group_password="${body.groupPass}"`, function (err: any, result: any, fields: any)
         {
+            if (err) throw err;
             if(result.length != 0) {
                 // Successful login
                 const json_output: {idgroups: BigInteger, group_name: string, group_password: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
@@ -101,6 +102,36 @@ app.post("/groupLogin", function (req: any, res: any) {
                 res.status(200).send(JSON.stringify({
                     successful: false
                 }));
+                con.end();
+            }
+        });
+    });
+});
+
+// Individual login section
+app.post("/login", function (req: any, res: any) {
+    const body: {username: string, password: string} = JSON.parse(req.body);
+    console.log(body);
+    let con = mysql.createConnection(credentials);
+    con.connect(function(err: any) {
+        if (err) throw err;
+        con.query(`SELECT session_id FROM users WHERE username="${body.username}" AND password="${body.password}"`, function (err: any, result: any, fields: any)
+        {
+            if (err) throw err;
+            if(result.length != 0) {
+                // Successful Login
+                const json_output: {session_id: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
+                console.log(json_output);
+                res.send({
+                    successful: true,
+                    session_id: json_output[0].session_id
+                });
+                con.end();
+            }
+            else {
+                res.send({
+                    successful: false
+                })
                 con.end();
             }
         });
