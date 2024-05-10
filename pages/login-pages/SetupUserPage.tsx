@@ -2,9 +2,6 @@ import { SafeAreaView, View, StyleSheet, Text, TextInput, TouchableOpacity, Aler
 import { api, theme } from '../../Constants';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CONSTANTS, JSHash } from 'react-native-hash';
-
-const hashAlgorithm = CONSTANTS.HashAlgorithms.sha256; // Used to ensure no password sent over internet. Note: Same hashing function as bitcoin uses
 
 export default function SetupUser({ navigation }) {
     const [groupName, setGroupName] = useState(""); // Get input for group name
@@ -94,11 +91,8 @@ export default function SetupUser({ navigation }) {
     }
 
     const attemptLogin = () => {
-        JSHash(password, hashAlgorithm)
-        .then(hash => {
-            doRequestForLogin(hash);
-        })
-        .catch(e => console.log(e));
+        const hash = password; // TODO: Implement hashing
+        doRequestForLogin(hash);
     }
 
     useEffect(() => {
