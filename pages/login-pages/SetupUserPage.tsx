@@ -2,17 +2,17 @@ import { SafeAreaView, View, StyleSheet, Text, TextInput, TouchableOpacity, Aler
 import { api, theme } from '../../Constants';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 
 export default function SetupUser({ navigation }) {
-    const [groupName, setGroupName] = useState(""); // Get input for group name
-    const [groupPassword, setGroupPassword] = useState(""); // Get input for password
-    const [success, setSuccess] = useState(true); // Used for incorrect name/password info
     const [groupId, setGroupID] = useState(BigInt(-1));
 
     // Individual login
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
+
+
 
     const checkLoggedIn = async () => {
         try {
@@ -91,8 +91,10 @@ export default function SetupUser({ navigation }) {
     }
 
     const attemptLogin = () => {
-        const hash = password; // TODO: Implement hashing
-        doRequestForLogin(hash);
+        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password).then((hash) => {
+            doRequestForLogin(hash);
+        });
+        
     }
 
     useEffect(() => {
@@ -102,6 +104,7 @@ export default function SetupUser({ navigation }) {
 
     const signup = () => {
         console.log("Signup!");
+        navigation.replace("GroupSignin");
     }
 
     return (

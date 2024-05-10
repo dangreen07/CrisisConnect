@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-gesture-handler';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SetupUser from './pages/login-pages/SetupUserPage';
@@ -29,7 +28,8 @@ export default function App() {
             headerShown: false,
           }}>
         <Stack.Screen name="Login" component={SetupUser} />
-        <Stack.Screen name="Signup" component={GroupSignin} />
+        <Stack.Screen name="GroupSignin" component={GroupSignin} />
+        <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="MainSection" component={MainAppNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
