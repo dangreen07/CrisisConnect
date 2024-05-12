@@ -26,6 +26,7 @@ export default function App() {
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator screenOptions={{
             headerShown: false,
+            animation: 'none'
           }}>
         <Stack.Screen name="Login" component={SetupUser} />
         <Stack.Screen name="GroupSignin" component={GroupSignin} />

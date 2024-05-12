@@ -49,8 +49,8 @@ app.post('/completedTask', async function (req:any, res:any) {
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
         const result = await con.query(`UPDATE tasks SET completed=1 WHERE task_id=?`, [task_id]);
-        console.log(result);
-        res.status(200).send(result);
+        console.log(result[0]);
+        res.status(200).send(result[0]);
     }
     catch (err) {
         console.log("ERROR => " + err);
@@ -67,8 +67,8 @@ app.post('/addTask', async function (req: any, res: any) {
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
         const result = await con.query(`INSERT INTO tasks (task_name, idgroups) VALUES (?, ?)`, [task_name, idgroup]);
-        console.log(result);
-        res.status(200).send(result);
+        console.log(result[0]);
+        res.status(200).send(result[0]);
     }
     catch (err) {
         console.log("ERROR => " + err);
@@ -100,8 +100,8 @@ app.post("/groupLogin", async function (req: any, res: any) {
     const body: {groupName: string, groupPass: string} = JSON.parse(req.body);
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`SELECT * FROM groups WHERE group_name=? AND group_password=?`, [body.groupName, body.groupPass]);
-        if(result.length != 0) {
+        const result = await con.query(`SELECT idgroups, group_name, group_pasword FROM groups WHERE group_name=? AND group_password=?`, [body.groupName, body.groupPass]);
+        if(result[0].length != 0) {
             // Successful login
             const json_output: {idgroups: BigInteger, group_name: string, group_password: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
             console.log("Successful login!");
@@ -134,9 +134,9 @@ app.post("/login", async function (req: any, res: any) {
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
         const result = await con.query(`SELECT session_id FROM users WHERE username=? AND password=?`, [body.username, body.password]);
-        if(result.length != 0) {
+        if(result[0].length != 0) {
             // Successful Login
-            const json_output: {session_id: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
+            const json_output: {session_id: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
             console.log(json_output);
             res.send({
                 successful: true,
@@ -165,9 +165,9 @@ app.get("/userInfo", async function (req: any, res: any) {
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
         const result = await con.query(`SELECT first_name, last_name, idgroups FROM users WHERE session_id=?`, [sessionID]);
-        if(result.length != 0) {
+        if(result[0].length != 0) {
             // Successful Login
-            const json_output: {first_name: string, last_name: string, idgroups: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
+            const json_output: {first_name: string, last_name: string, idgroups: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
             console.log(json_output);
             res.send({
                 successful: true,

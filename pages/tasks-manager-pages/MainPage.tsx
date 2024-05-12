@@ -5,9 +5,12 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpaci
 import TaskItem from '../../Components/TaskItem';
 import { api, theme } from '../../Constants';
 import { useIsFocused } from '@react-navigation/native';
+import { SplashScreen } from 'expo-router';
 
 const addSymbol = require("../../assets/add.png");
 const reloadSymbol = require('../../assets/reload.png');
+
+SplashScreen.preventAutoHideAsync();
 
 export default function MainPage({navigation}) {
   const [tasks, setTasks] = useState([]);
@@ -19,6 +22,7 @@ export default function MainPage({navigation}) {
       method: 'GET',
     }).then(response => response.json()).then(json => {
       setTasks(json);
+      SplashScreen.hideAsync();
     }).catch(error => {
       console.error(error);
     });
@@ -30,6 +34,7 @@ export default function MainPage({navigation}) {
 
   useEffect(() => {
     getTasksFromAPI();
+    
   }, [isFocused]);
 
   return (

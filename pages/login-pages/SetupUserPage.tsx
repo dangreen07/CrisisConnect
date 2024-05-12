@@ -3,9 +3,13 @@ import { api, theme } from '../../Constants';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
 
 export default function SetupUser({ navigation }) {
     const [groupId, setGroupID] = useState(BigInt(-1));
+    
 
     // Individual login
     const [username, setUsername] = useState("");
@@ -23,6 +27,7 @@ export default function SetupUser({ navigation }) {
             }
             else {
                 setLoggedIn(false);
+                SplashScreen.hideAsync();
             }
         }
         else {
