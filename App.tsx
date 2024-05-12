@@ -4,8 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SetupUser from './pages/login-pages/SetupUserPage';
 import MainAppNavigator from './pages/MainAppNavigator';
 import { theme } from './Constants';
-import Signup from './pages/login-pages/GroupLoginPage';
 import GroupSignin from './pages/login-pages/GroupLoginPage';
+import Signup from './pages/login-pages/Signup';
 
 const Stack = createNativeStackNavigator();
 

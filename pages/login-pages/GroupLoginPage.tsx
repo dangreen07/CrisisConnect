@@ -2,21 +2,27 @@ import { SafeAreaView, View, StyleSheet, Text, TextInput, TouchableOpacity } fro
 import { api, theme } from "../../Constants";
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Crypto from 'expo-crypto';
 
-export default function GroupSignin() {
+
+export default function GroupSignin({navigation}) {
     const [groupName, setGroupName] = useState("");
     const [groupPassword, setGroupPassword] = useState("");
 
     const saveGroup = async (groupId: BigInteger) => {
         try {
-            await AsyncStorage.setItem("groupId", groupId.toString());
+            AsyncStorage.setItem("groupId", groupId.toString()).then(() => {
+                navigation.navigate("Signup", {
+                    groupId: groupId
+                });
+            });
         } catch (e) {
             // Error reading value
             console.error(e);
         }
     }
 
-    const groupLogin = () => {
+    const groupLogin = (hashed: string) => {
         fetch(`${api.address}/groupLogin`, {
             method: 'POST',
             headers: {
@@ -25,17 +31,23 @@ export default function GroupSignin() {
             },
             body: JSON.stringify({
                 groupName: groupName,
-                groupPass: groupPassword
+                groupPass: hashed
             })
         }).then(response => response.json()).then(json => {
+            console.log(json);
             if(json["successful"] == true) {
                 const groupId = json["groupID"];
-                console.log("Success!");
                 saveGroup(groupId);
             }
         }).catch(error => {
             console.error(error);
         })
+    }
+
+    const groupLoginAttempt = () => {
+        Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, groupPassword).then((hash) => {
+            groupLogin(hash);
+        });
     }
 
     return (
@@ -48,7 +60,7 @@ export default function GroupSignin() {
                 <View style={styles.inputRow}>
                     <TextInput style={styles.inputBox} placeholder='Group Password' onChangeText={newText => setGroupPassword(newText)} defaultValue={groupPassword} />
                 </View>
-                <TouchableOpacity style={styles.submitButton} onPress={groupLogin}>
+                <TouchableOpacity style={styles.submitButton} onPress={groupLoginAttempt}>
                         <Text style={{fontSize: 24,}}>Login</Text>
                 </TouchableOpacity>
             </SafeAreaView>

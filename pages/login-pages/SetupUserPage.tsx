@@ -12,8 +12,6 @@ export default function SetupUser({ navigation }) {
     const [password, setPassword] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
 
-
-
     const checkLoggedIn = async () => {
         try {
         const value = await AsyncStorage.getItem("sessionID");
@@ -94,7 +92,6 @@ export default function SetupUser({ navigation }) {
         Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password).then((hash) => {
             doRequestForLogin(hash);
         });
-        
     }
 
     useEffect(() => {
@@ -104,7 +101,7 @@ export default function SetupUser({ navigation }) {
 
     const signup = () => {
         console.log("Signup!");
-        navigation.replace("GroupSignin");
+        navigation.navigate("GroupSignin");
     }
 
     return (
