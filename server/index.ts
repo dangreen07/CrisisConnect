@@ -54,7 +54,8 @@ app.post('/completedTask', async function (req:any, res:any) {
     }
     catch (err) {
         console.log("ERROR => " + err);
-        res.status(500); // internal server error
+        // Internal server error
+        res.status(500); 
     }
     finally {
         con.end();
@@ -72,7 +73,8 @@ app.post('/addTask', async function (req: any, res: any) {
     }
     catch (err) {
         console.log("ERROR => " + err);
-        res.status(500); // internal server error
+        // Internal server error
+        res.status(500); 
     }
     finally {
         con.end();
@@ -168,7 +170,6 @@ app.get("/userInfo", async function (req: any, res: any) {
         if(result[0].length != 0) {
             // Successful Login
             const json_output: {first_name: string, last_name: string, idgroups: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
-            console.log(json_output);
             res.send({
                 successful: true,
                 first_name: json_output[0].first_name,
@@ -207,7 +208,8 @@ async function checkUsernameInUse(username: string): Promise<Boolean> {
     }
     catch (err) {
         console.log("ERROR => " + err);
-        return true; // Username is in use
+        // Username is in use
+        return true; 
     }
     finally {
         con.end();
@@ -218,7 +220,7 @@ app.post("/signup", async function (req: any, res: any) {
     const body: {firstName: string, lastName: string, username: string, password: string, groupId: string} = JSON.parse(req.body);
     const usernameChecked = await checkUsernameInUse(body.username);
     if(usernameChecked == false) {
-        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true})
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
         const sessionID = uuidv4();
         try {
             const query = `INSERT INTO users (idgroups, first_name, last_name, username, password, session_id) VALUES (?, ?, ?, ?, ?, ?)`;
@@ -251,6 +253,95 @@ app.post("/signup", async function (req: any, res: any) {
             successful: false,
             reason: "Username already in use!",
         })
+    }
+});
+
+// The authentication function (Very important this is reliable)
+async function userAuth(sessionID: string): Promise<Boolean> {
+    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+    try {
+        const result = await con.query(`SELECT * FROM users WHERE session_id=?`, [sessionID]);
+        if(result[0].length == 0) {
+            // Failed authentication
+            return false; 
+        }
+        else {
+            // User authenticated
+            return true; 
+        }
+    }
+    catch (err) {
+        console.log("Error => " + err);
+        return false;
+    }
+    finally {
+        con.end();
+    }
+}
+
+app.post("/setRegion", async function (req: any, res: any) {
+    // Will use sessionID for authentication (especially important here as modifying data for the entire group)
+    const body: {
+        groupID: Number,
+        sessionID: string,
+        latitude: Number,
+        longitude: Number,
+        latitudeDelta: Number,
+        longitudeDelta: Number
+    } = JSON.parse(req.body);
+    const userAuthenticated = await userAuth(body.sessionID);
+    if (userAuthenticated) {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`UPDATE groups SET latitude=?,longitude=?,latitudeDelta=?,longitudeDelta=? WHERE idgroups=?`, [body.latitude, body.longitude, body.latitudeDelta, body.longitudeDelta, body.groupID]);
+            res.status(200).send({
+                successful: true
+            });
+        }
+        catch (err) {
+            res.status(500);
+        }
+        finally {
+            con.end();
+        }
+    }
+    else {
+        // Failed authentication
+        // 401 - Unauthorized
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
+    }
+});
+
+app.post("/getRegion", async function (req: any, res: any) {
+    const body: {
+        groupID: Number,
+        sessionID: string
+    } = JSON.parse(req.body);
+    const userAuthenticated = await userAuth(body.sessionID);
+    if (userAuthenticated) {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`SELECT latitude, longitude, latitudeDelta, longitudeDelta FROM groups WHERE idgroups=?`, [body.groupID]);
+            const json_output: {latitude: Number, longitude: Number, latitudeDelta: Number, longitudeDelta: Number}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
+            res.status(200).send({
+                successful: true,
+                latitude: json_output[0].latitude,
+                longitude: json_output[0].longitude,
+                latitudeDelta: json_output[0].latitudeDelta,
+                longitudeDelta: json_output[0].longitudeDelta
+            });
+        }
+        catch (err) {
+            res.status(500);
+        }
+        finally {
+            con.end();
+        }
+    }
+    else {
+        // Failed authentication
+        // 401 - Unauthorized
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
     }
 });
 

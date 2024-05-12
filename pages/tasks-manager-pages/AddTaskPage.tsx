@@ -39,7 +39,7 @@ export default function AddTask({navigation}) {
             Alert.alert("Create Task", `Are you sure you want to create a task called: ${taskName}`,[
                 cancelNewTask,
                 confirmNewTask,
-            ])
+            ]);
         }
     }
 
