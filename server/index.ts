@@ -16,26 +16,39 @@ const credentials = {
 
 
 app.get('/getTasks', async function (req: any, res: any) {
+    // Get the group id from the request query
     const group_id = req.query.group;
+
+    // Create a new MySQL connection pool
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+
     try {
-        const result = await con.query(`SELECT * FROM tasks WHERE idgroups=${group_id} AND completed=0 ORDER BY task_id ASC`);
+        // Query the tasks table for tasks belonging to the specified group and not completed
+        const result = await con.query(`SELECT * FROM tasks WHERE idgroups=? AND completed=0 ORDER BY task_id ASC`, [group_id]);
+
+        // Parse the result into JSON
         const json_output = Object.values(JSON.parse(JSON.stringify(result[0])));
+
+        // Send the JSON result with a 200 status code
         res.status(200).send(json_output);
     } catch (err) {
+        // Log any errors
         console.log("ERROR => " + err);
-        res.status(500); // internal server error
+
+        // Send a 500 status code for internal server error
+        res.status(500);
     } finally {
+        // End the MySQL connection
         con.end();
     }
 });
 
-// A function for when a task is completed
+
 app.post('/completedTask', async function (req:any, res:any) {
     const task_id = req.query.task;
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`UPDATE tasks SET completed=1 WHERE task_id=${task_id}`);
+        const result = await con.query(`UPDATE tasks SET completed=1 WHERE task_id=?`, [task_id]);
         console.log(result);
         res.status(200).send(result);
     }
@@ -53,7 +66,7 @@ app.post('/addTask', async function (req: any, res: any) {
     const idgroup = req.query.group;
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`INSERT INTO tasks (task_name, idgroups) VALUES ("${task_name}", ${idgroup})`);
+        const result = await con.query(`INSERT INTO tasks (task_name, idgroups) VALUES (?, ?)`, [task_name, idgroup]);
         console.log(result);
         res.status(200).send(result);
     }
@@ -66,12 +79,12 @@ app.post('/addTask', async function (req: any, res: any) {
     }
 });
 
-// Announcements Subsection
+
 app.get('/getAnnouncements', async function (req: any, res: any){
     const group_id = req.query.group;
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`SELECT * FROM announcements WHERE idgroups=${group_id} ORDER BY announcements_id DESC`);
+        const result = await con.query(`SELECT * FROM announcements WHERE idgroups=? ORDER BY announcements_id DESC`, [group_id]);
         const json_output = Object.values(JSON.parse(JSON.stringify(result[0])));
         res.status(200).send(json_output);
     } catch (err) {
@@ -83,12 +96,11 @@ app.get('/getAnnouncements', async function (req: any, res: any){
     }
 });
 
-// Group login section
 app.post("/groupLogin", async function (req: any, res: any) {
     const body: {groupName: string, groupPass: string} = JSON.parse(req.body);
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`SELECT * FROM groups WHERE group_name="${body.groupName}" AND group_password="${body.groupPass}"`);
+        const result = await con.query(`SELECT * FROM groups WHERE group_name=? AND group_password=?`, [body.groupName, body.groupPass]);
         if(result.length != 0) {
             // Successful login
             const json_output: {idgroups: BigInteger, group_name: string, group_password: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
@@ -121,7 +133,7 @@ app.post("/login", async function (req: any, res: any) {
     const body: {username: string, password: string} = JSON.parse(req.body);
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`SELECT session_id FROM users WHERE username="${body.username}" AND password="${body.password}"`);
+        const result = await con.query(`SELECT session_id FROM users WHERE username=? AND password=?`, [body.username, body.password]);
         if(result.length != 0) {
             // Successful Login
             const json_output: {session_id: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
@@ -152,7 +164,7 @@ app.get("/userInfo", async function (req: any, res: any) {
     const sessionID = req.query.session_id;
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`SELECT first_name, last_name, idgroups FROM users WHERE session_id="${sessionID}"`);
+        const result = await con.query(`SELECT first_name, last_name, idgroups FROM users WHERE session_id=?`, [sessionID]);
         if(result.length != 0) {
             // Successful Login
             const json_output: {first_name: string, last_name: string, idgroups: string}[] = Object.values(JSON.parse(JSON.stringify(result)));
@@ -202,7 +214,6 @@ async function checkUsernameInUse(username: string): Promise<Boolean> {
     }
 }
 
-// Signup user
 app.post("/signup", async function (req: any, res: any) {
     const body: {firstName: string, lastName: string, username: string, password: string, groupId: string} = JSON.parse(req.body);
     const usernameChecked = await checkUsernameInUse(body.username);
@@ -210,8 +221,15 @@ app.post("/signup", async function (req: any, res: any) {
         let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true})
         const sessionID = uuidv4();
         try {
-            const query = `INSERT INTO users (idgroups, first_name, last_name, username, password, session_id) VALUES (${body.groupId}, "${body.firstName}", "${body.lastName}", "${body.username}", "${body.password}", "${sessionID}")`;
-            const rows = await con.query(query);
+            const query = `INSERT INTO users (idgroups, first_name, last_name, username, password, session_id) VALUES (?, ?, ?, ?, ?, ?)`;
+            const rows = await con.query(query, [
+                body.groupId,
+                body.firstName,
+                body.lastName,
+                body.username,
+                body.password,
+                sessionID
+            ]);
             res.status(200).send({
                 successful: true,
                 sessionID: sessionID
