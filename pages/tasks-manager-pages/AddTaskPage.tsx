@@ -11,10 +11,10 @@ export default function AddTask({navigation}) {
     const [taskName, setTaskName] = useState('');
 
     const addNewTaskToDatabase = () => [
-        fetch(`${api.address}/addTask?name=${taskName}&group=1`, {
+        fetch(`${api.address}/addTask?name=${taskName}&session_id=${global.sessionID}`, {
             method: 'POST',
         }).then(response => {
-            console.log(response);
+            navigation.navigate("Main");
         }).catch(error => {
             console.error(error);
         })
@@ -24,7 +24,6 @@ export default function AddTask({navigation}) {
         text: 'Confirm',
         onPress: () => {
             addNewTaskToDatabase();
-            navigation.navigate("Main");
         }
     }
 

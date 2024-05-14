@@ -17,84 +17,119 @@ const credentials = {
 
 app.get('/getTasks', async function (req: any, res: any) {
     // Get the group id from the request query
-    const group_id = req.query.group;
+    const sessionID = req.query.session_id;
 
-    // Create a new MySQL connection pool
-    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+    const userAuthenticated = await userAuth(sessionID);
 
-    try {
-        // Query the tasks table for tasks belonging to the specified group and not completed
-        const result = await con.query(`SELECT * FROM tasks WHERE idgroups=? AND completed=0 ORDER BY task_id ASC`, [group_id]);
-
-        // Parse the result into JSON
-        const json_output = Object.values(JSON.parse(JSON.stringify(result[0])));
-
-        // Send the JSON result with a 200 status code
-        res.status(200).send(json_output);
-    } catch (err) {
-        // Log any errors
-        console.log("ERROR => " + err);
-
-        // Send a 500 status code for internal server error
-        res.status(500);
-    } finally {
-        // End the MySQL connection
-        con.end();
+    if(userAuthenticated)
+    {
+        const groupID = await getGroupID(sessionID);
+        // Create a new MySQL connection pool
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            // Query the tasks table for tasks belonging to the specified group and not completed
+            const result = await con.query(`SELECT * FROM tasks WHERE idgroups=? AND completed=0 ORDER BY task_id ASC`, [groupID]);
+    
+            // Parse the result into JSON
+            const json_output = Object.values(JSON.parse(JSON.stringify(result[0])));
+    
+            // Send the JSON result with a 200 status code
+            res.status(200).send({successful: true, result: json_output});
+        } catch (err) {
+            // Log any errors
+            console.log("ERROR => " + err);
+    
+            // Send a 500 status code for internal server error
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        } finally {
+            // End the MySQL connection
+            con.end();
+        }
+    }
+    else
+    {
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
     }
 });
 
-
 app.post('/completedTask', async function (req:any, res:any) {
     const task_id = req.query.task;
-    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
-    try {
-        const result = await con.query(`UPDATE tasks SET completed=1 WHERE task_id=?`, [task_id]);
-        console.log(result[0]);
-        res.status(200).send(result[0]);
+    const sessionID = req.query.session_id;
+    const userAuthenticated = await userAuth(sessionID);
+    if(userAuthenticated)
+    {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`UPDATE tasks SET completed=1 WHERE task_id=?`, [task_id]);
+            console.log(result[0]);
+            res.status(200).send({successful: true, result: result[0]});
+        }
+        catch (err) {
+            console.log("ERROR => " + err);
+            // Internal server error
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
     }
-    catch (err) {
-        console.log("ERROR => " + err);
-        // Internal server error
-        res.status(500); 
-    }
-    finally {
-        con.end();
+    else {
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
     }
 });
 
 app.post('/addTask', async function (req: any, res: any) {
     const task_name = req.query.name;
-    const idgroup = req.query.group;
-    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
-    try {
-        const result = await con.query(`INSERT INTO tasks (task_name, idgroups) VALUES (?, ?)`, [task_name, idgroup]);
-        console.log(result[0]);
-        res.status(200).send(result[0]);
+    const sessionID = req.query.session_id;
+    const userAuthenticated = await userAuth(sessionID);
+
+    if(userAuthenticated)
+    {
+        const idgroup = await getGroupID(sessionID);
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`INSERT INTO tasks (task_name, idgroups) VALUES (?, ?)`, [task_name, idgroup]);
+            console.log(result[0]);
+            res.status(200).send({successful: true, result: result[0]});
+        }
+        catch (err) {
+            console.log("ERROR => " + err);
+            // Internal server error
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
     }
-    catch (err) {
-        console.log("ERROR => " + err);
-        // Internal server error
-        res.status(500); 
-    }
-    finally {
-        con.end();
+    else {
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
     }
 });
 
 
 app.get('/getAnnouncements', async function (req: any, res: any){
-    const group_id = req.query.group;
-    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
-    try {
-        const result = await con.query(`SELECT * FROM announcements WHERE idgroups=? ORDER BY announcements_id DESC`, [group_id]);
-        const json_output = Object.values(JSON.parse(JSON.stringify(result[0])));
-        res.status(200).send(json_output);
-    } catch (err) {
-        console.log("ERROR => " + err);
-        res.status(200);
+    const sessionID = req.query.session_id;
+    const userAuthenticated = await userAuth(sessionID);
+
+    if(userAuthenticated)
+    {
+        const group_id = await getGroupID(sessionID);
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`SELECT * FROM announcements WHERE idgroups=? ORDER BY announcements_id DESC`, [group_id]);
+            const json_output = Object.values(JSON.parse(JSON.stringify(result[0])));
+            res.status(200).send({successful: true, result: json_output});
+        } catch (err) {
+            console.log("ERROR => " + err);
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
     }
-    finally {
-        con.end();
+    else
+    {
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
     }
 });
 

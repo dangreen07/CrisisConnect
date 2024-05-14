@@ -10,7 +10,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function SetupUser({ navigation }) {
     const [groupId, setGroupID] = useState(BigInt(-1));
-    
 
     // Individual login
     const [username, setUsername] = useState("");

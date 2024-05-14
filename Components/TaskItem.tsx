@@ -5,7 +5,7 @@ import React from 'react';
 
 export default function Task( {taskName="G".repeat(35), taskId, reloadFunction} : {taskName?: string, taskId, reloadFunction: any} ) {
     const completeTask = () => {
-        fetch(`${api.address}/completedTask?task=${taskId}`, {
+        fetch(`${api.address}/completedTask?task=${taskId}&session_id=${global.sessionID}`, {
             method: 'POST',
         }).then(response => {
             reloadFunction();

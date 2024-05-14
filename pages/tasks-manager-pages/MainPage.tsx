@@ -18,10 +18,10 @@ export default function MainPage({navigation}) {
 
   const getTasksFromAPI = () => {
     // In the real world this would connect to a cloud hosted API and not something on a local network
-    fetch(`${api.address}/getTasks?group=1`, {
+    fetch(`${api.address}/getTasks?session_id=${global.sessionID}`, {
       method: 'GET',
     }).then(response => response.json()).then(json => {
-      setTasks(json);
+      setTasks(json["result"]);
       SplashScreen.hideAsync();
     }).catch(error => {
       console.error(error);
@@ -34,7 +34,6 @@ export default function MainPage({navigation}) {
 
   useEffect(() => {
     getTasksFromAPI();
-    
   }, [isFocused]);
 
   return (

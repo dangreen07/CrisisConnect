@@ -11,10 +11,10 @@ export default function AnnouncementsPage({navigation}) {
   const isFocused = useIsFocused();
 
   const getAnnouncementsFromAPI = () => {
-    fetch(`${api.address}/getAnnouncements?group=1`, {
+    fetch(`${api.address}/getAnnouncements?session_id=${global.sessionID}`, {
       method: 'GET',
     }).then(response => response.json()).then(json => {
-      setAnnouncements(json);
+      setAnnouncements(json["result"]);
     }).catch(error => {
       console.error(error);
     });
