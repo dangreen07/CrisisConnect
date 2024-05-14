@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SafeAreaView, View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
 import MapView, { Details, Region } from "react-native-maps";
 import { api, theme } from "../Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
+import * as SplashScreen from 'expo-splash-screen';
 
 const saveIcon = require('../assets/save-icon.png');
+
+SplashScreen.preventAutoHideAsync();
 
 export default function Map({navigation}) {
     // This is San Francisco as default area.
@@ -15,12 +18,20 @@ export default function Map({navigation}) {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
     });
-    const [groupId, setGroupId] = useState(0);
-    const [sessionID, setSessionID] = useState("");
     const isFocused = useIsFocused();
+    const mapRef = useRef(null);
 
     const regionChanged = (region: Region, details: Details) => {
         setRegion(region);
+    }
+
+    const saveRegionToStorage = async (region: Region) => {
+        try {
+            AsyncStorage.setItem("GroupRegion", JSON.stringify(region));
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
 
     const getRegion = () => {
@@ -31,17 +42,19 @@ export default function Map({navigation}) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                groupID: groupId,
-                sessionID: sessionID
+                sessionID: global.sessionID
             })
         }).then(response => response.json()).then(json => {
             if(json["successful"] == true) {
-                setRegion({
+                const regionToSet: Region = {
                     latitude: json["latitude"],
                     longitude: json["longitude"],
                     latitudeDelta: json["latitudeDelta"],
                     longitudeDelta: json["longitudeDelta"]
-                });
+                };
+                setRegion(regionToSet);
+                mapRef.current.animateToRegion(regionToSet,10);
+                saveRegionToStorage(regionToSet);
             }
         }).catch (error => {
             // Handle error
@@ -50,18 +63,12 @@ export default function Map({navigation}) {
     }
 
     const getInitialInfo = async () => {
-        // Group ID
+        // Getting saved location in case no signal and to avoid loading times to talk to the server
         try {
-            const value = await AsyncStorage.getItem("groupId");
-            setGroupId(Number.parseInt(value));
-        }
-        catch (e) {
-            // Handle error
-        }
-        // Session ID
-        try {
-            const value = await AsyncStorage.getItem("sessionID");
-            setSessionID(value);
+            const value = await AsyncStorage.getItem("GroupRegion");
+            if(value !== null) {
+                setRegion(JSON.parse(value));
+            }
         }
         catch (e) {
             // Handle error
@@ -78,8 +85,7 @@ export default function Map({navigation}) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                groupID: groupId,
-                sessionID: sessionID,
+                sessionID: global.sessionID,
                 latitude: region.latitude,
                 longitude: region.longitude,
                 latitudeDelta: region.latitudeDelta,
@@ -119,7 +125,7 @@ export default function Map({navigation}) {
     return (
         <View style={styles.container}>
             <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
-                <MapView style={styles.map} region={region} onRegionChange={regionChanged}/>
+                <MapView style={styles.map} region={region} onRegionChange={regionChanged} mapType="hybrid" ref={mapRef}/>
             </SafeAreaView>
             <TouchableOpacity style={styles.saveMap} onPress={setMap}>
                     <Image style={styles.saveImage} source={saveIcon} />

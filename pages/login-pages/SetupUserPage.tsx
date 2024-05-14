@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import * as SplashScreen from 'expo-splash-screen';
+import { useIsFocused } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,6 +16,7 @@ export default function SetupUser({ navigation }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
+    const isFocused = useIsFocused();
 
     const checkLoggedIn = async () => {
         try {
@@ -23,6 +25,7 @@ export default function SetupUser({ navigation }) {
             // Value previously stored
             if (value !== "removed") {
                 setLoggedIn(true);
+                global.sessionID = value;
                 navigation.replace("MainSection");
             }
             else {
@@ -41,12 +44,13 @@ export default function SetupUser({ navigation }) {
 
     useEffect(() => {
         checkLoggedIn();
-    }, [loggedIn]);
+    }, [isFocused]);
 
 
     const saveSessionID = (sessionID: string) => {
         try {
             AsyncStorage.setItem("sessionID", sessionID).then(() => {
+                global.sessionID = sessionID;
                 navigation.replace('MainSection'); // Used replace to ensure that the user cannot go back with a swipe or back button
             });
         } catch (e) {

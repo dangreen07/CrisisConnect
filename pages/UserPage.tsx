@@ -17,8 +17,8 @@ export default function UserPage({route, navigation}) {
         }
     }
 
-    const getUserData = (sessionID: string) => {
-        fetch(`${api.address}/userInfo?session_id=${sessionID}`, {
+    const getUserData = () => {
+        fetch(`${api.address}/userInfo?session_id=${global.sessionID}`, {
             method: 'GET'
         }).then(response => response.json()).then(json => {
             if(json["successful"] == true) {
@@ -36,24 +36,13 @@ export default function UserPage({route, navigation}) {
         })
     }
 
-    // At this point it should be in the system memory
-    const getSessionID = () => {
-        try {
-            AsyncStorage.getItem("sessionID").then((value) => {
-                getUserData(value);
-            });
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
     const logout = async () => {
         await AsyncStorage.setItem("sessionID", "removed");
         navigation.replace('Login');
     }
 
     useEffect(() => {
-        getSessionID();
+        getUserData();
     },[isFocused]);
 
     return (

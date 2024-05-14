@@ -282,7 +282,6 @@ async function userAuth(sessionID: string): Promise<Boolean> {
 app.post("/setRegion", async function (req: any, res: any) {
     // Will use sessionID for authentication (especially important here as modifying data for the entire group)
     const body: {
-        groupID: Number,
         sessionID: string,
         latitude: Number,
         longitude: Number,
@@ -293,7 +292,8 @@ app.post("/setRegion", async function (req: any, res: any) {
     if (userAuthenticated) {
         let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
         try {
-            const result = await con.query(`UPDATE groups SET latitude=?,longitude=?,latitudeDelta=?,longitudeDelta=? WHERE idgroups=?`, [body.latitude, body.longitude, body.latitudeDelta, body.longitudeDelta, body.groupID]);
+            const groupID = await getGroupID(body.sessionID);
+            const result = await con.query(`UPDATE groups SET latitude=?,longitude=?,latitudeDelta=?,longitudeDelta=? WHERE idgroups=?`, [body.latitude, body.longitude, body.latitudeDelta, body.longitudeDelta, groupID]);
             res.status(200).send({
                 successful: true
             });
@@ -312,16 +312,32 @@ app.post("/setRegion", async function (req: any, res: any) {
     }
 });
 
+async function getGroupID(sessionID: string) {
+    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+    try {
+        const result = await con.query(`SELECT * FROM users WHERE session_id=?`, [sessionID]);
+        const groupID = result[0][0]["idgroups"];
+        return groupID;
+    }
+    catch (err) {
+        console.log("Error => " + err);
+        return 0;
+    }
+    finally {
+        con.end();
+    }
+}
+
 app.post("/getRegion", async function (req: any, res: any) {
     const body: {
-        groupID: Number,
         sessionID: string
     } = JSON.parse(req.body);
     const userAuthenticated = await userAuth(body.sessionID);
     if (userAuthenticated) {
         let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
         try {
-            const result = await con.query(`SELECT latitude, longitude, latitudeDelta, longitudeDelta FROM groups WHERE idgroups=?`, [body.groupID]);
+            const groupID = await getGroupID(body.sessionID);
+            const result = await con.query(`SELECT latitude, longitude, latitudeDelta, longitudeDelta FROM groups WHERE idgroups=?`, [groupID]);
             const json_output: {latitude: Number, longitude: Number, latitudeDelta: Number, longitudeDelta: Number}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
             res.status(200).send({
                 successful: true,
