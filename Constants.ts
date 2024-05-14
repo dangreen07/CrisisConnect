@@ -1,10 +1,10 @@
 export const theme = {
-    backgroundColor: "#FFF",
-    foregroundColor: "#7EE8FA",
-    textColor: "#04080F",
-    primaryColor: '#04080F',
-    navigatorColor: '#7EE8FA',
-    newTaskColor: '#32CD32'
+    backgroundColor: "#FFF", // White
+    foregroundColor: "#7EE8FA", // Pale blue
+    textColor: "#04080F", // Ink Black
+    primaryColor: '#04080F', // Ink Black
+    navigatorColor: '#7EE8FA', // Pale Blue
+    newTaskColor: '#32CD32' // Light Green
 }
 
 export const api = {

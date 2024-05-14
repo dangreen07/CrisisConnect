@@ -6,6 +6,7 @@ import TaskItem from '../../Components/TaskItem';
 import { api, theme } from '../../Constants';
 import { useIsFocused } from '@react-navigation/native';
 import { SplashScreen } from 'expo-router';
+import { Icon } from 'react-native-paper';
 
 const addSymbol = require("../../assets/add.png");
 const reloadSymbol = require('../../assets/reload.png');
@@ -42,7 +43,7 @@ export default function MainPage({navigation}) {
         <View style={styles.topbar}>
           <Text style={styles.title}>Current Tasks</Text>
           <TouchableOpacity style={styles.reloadButton} onPress={getTasksFromAPI}>
-            <Image style={styles.reloadIcon} source={reloadSymbol} />
+            <Icon source="reload" size={40} />
           </TouchableOpacity>
         </View>
         <ScrollView>
@@ -53,8 +54,7 @@ export default function MainPage({navigation}) {
           })}
         </ScrollView>
         <TouchableOpacity style={styles.addButton} onPress={addTask}>
-          {/* Attribution to author of add.png <a href="https://www.flaticon.com/free-icons/plus" title="plus icons">Plus icons created by srip - Flaticon</a> */}
-          <Image style={styles.addIcon} source={addSymbol} />
+          <Icon source="plus" size={50} />
         </TouchableOpacity>
       </SafeAreaView>
       <StatusBar style="auto"/>
@@ -83,22 +83,12 @@ const styles = StyleSheet.create({
     padding: 5,
     marginRight: 10,
   },
-  reloadIcon: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
-  },
   addButton: {
     position: 'absolute',
     right: 15,
     bottom: 15,
     backgroundColor: theme.newTaskColor,
-    padding: 20,
+    padding: 15,
     borderRadius: 40,
-  },
-  addIcon: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
   }
 });

@@ -6,11 +6,12 @@ import MainAppNavigator from './pages/MainAppNavigator';
 import { theme } from './Constants';
 import GroupSignin from './pages/login-pages/GroupLoginPage';
 import Signup from './pages/login-pages/Signup';
+import { PaperProvider } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator();
 
 const MyTheme = {
-  ...DefaultTheme,
+  dark: false,
   colors: {
     ...DefaultTheme.colors,
     background: theme.backgroundColor,
@@ -23,16 +24,18 @@ const MyTheme = {
 
 export default function App() {
   return (
-    <NavigationContainer theme={MyTheme}>
-      <Stack.Navigator screenOptions={{
-            headerShown: false,
-            animation: 'none'
-          }}>
-        <Stack.Screen name="Login" component={SetupUser} />
-        <Stack.Screen name="GroupSignin" component={GroupSignin} />
-        <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="MainSection" component={MainAppNavigator} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <PaperProvider theme={{ version: 2 }}>
+      <NavigationContainer theme={MyTheme}>
+        <Stack.Navigator screenOptions={{
+              headerShown: false,
+              animation: 'none'
+            }}>
+          <Stack.Screen name="Login" component={SetupUser} />
+          <Stack.Screen name="GroupSignin" component={GroupSignin} />
+          <Stack.Screen name="Signup" component={Signup} />
+          <Stack.Screen name="MainSection" component={MainAppNavigator} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
   )
 };
