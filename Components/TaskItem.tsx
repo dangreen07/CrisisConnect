@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import { api, theme } from '../Constants';
 import React from 'react';
+import { Icon } from 'react-native-paper';
 
 
 export default function Task( {taskName="G".repeat(35), taskId, reloadFunction} : {taskName?: string, taskId, reloadFunction: any} ) {
@@ -40,7 +41,7 @@ export default function Task( {taskName="G".repeat(35), taskId, reloadFunction} 
             onPress={taskComplete}
             style={styles.button}
             >
-                <Image style={styles.taskComplete} source={require('../assets/task-complete.png')} />
+                <Icon source="check-circle-outline" size={50} />
             </TouchableOpacity>
         </View>
     );
@@ -67,11 +68,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         elevation: 3,
         padding: 10,
-    },
-    taskComplete: {
-        width: 40,
-        height: 40,
-        resizeMode: 'contain',
-        marginRight: 10,
+        marginRight: 10
     }
 });

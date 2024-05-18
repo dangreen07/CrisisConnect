@@ -26,7 +26,7 @@ export default function Map({navigation}) {
     const [errorMsg, setErrorMsg] = useState(null);
     const [userLocations, setUserLocations] = useState([]);
 
-    const regionChanged = (region: Region, details: Details) => {
+    const regionChanged = (region: Region) => {
         setRegion(region);
     }
 
@@ -230,7 +230,7 @@ export default function Map({navigation}) {
     return (
         <View style={styles.container}>
             <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
-                <MapView style={styles.map} region={region} onRegionChange={regionChanged} mapType="hybrid" ref={mapRef} onLongPress={addMarker} provider={PROVIDER_DEFAULT}>
+                <MapView style={styles.map} region={region} onRegionChangeComplete={regionChanged} mapType="hybrid" ref={mapRef} onLongPress={addMarker} provider={PROVIDER_DEFAULT}>
                     {markers.map((marker, index) => (
                         <Marker
                             key={index}
@@ -265,6 +265,14 @@ export default function Map({navigation}) {
                             color="black" />
                         </Marker>
                     ))}
+                    {location != null &&
+                        <Marker coordinate={{
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                        }}
+                        title="Your Location">
+                        <Icon size={30} source="account" color={theme.newTaskColor}/>
+                    </Marker>}
                 </MapView>
             </SafeAreaView>
             <TouchableOpacity style={styles.saveMap} onPress={setMap}>
