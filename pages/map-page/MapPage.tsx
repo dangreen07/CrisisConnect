@@ -100,7 +100,7 @@ export default function Map({navigation}) {
             console.log(json);
         }).catch(error => {
             console.log(error);
-        })
+        });
     }
 
     const confirmNewMap = {
@@ -219,9 +219,13 @@ export default function Map({navigation}) {
         });
     }
 
+    const deleteMarker = () => {
+        navigation.navigate("DeleteMarker");
+    }
+
     useEffect(() => {
         setupLocation();
-      }, []);
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -266,6 +270,9 @@ export default function Map({navigation}) {
             <TouchableOpacity style={styles.saveMap} onPress={setMap}>
                     <Icon source="content-save-outline" size={60} />
             </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteMarker} onPress={deleteMarker}>
+                    <Icon source="delete" size={60} />
+            </TouchableOpacity>
         </View>
     );
 }
@@ -284,6 +291,14 @@ const styles = StyleSheet.create({
         bottom: 15,
         right: 15,
         backgroundColor: theme.newTaskColor,
+        borderRadius: 40,
+        padding: 10,
+    },
+    deleteMarker: {
+        position: 'absolute',
+        bottom: 110,
+        right: 15,
+        backgroundColor: theme.deleteColor,
         borderRadius: 40,
         padding: 10,
     }

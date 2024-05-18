@@ -489,9 +489,35 @@ app.get("/getMarkers", async function (req: any, res: any) {
         let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
         try {
             const groupID = await getGroupID(sessionID);
-            const result = await con.query(`SELECT latitude, longitude, title, description, icon_source, icon_color FROM map_locations WHERE idgroups=?`, [groupID]);
-            const json_output: {latitude: Number, longitude: Number, title: String, description: String, icon_source: String, icon_color: String}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
+            const result = await con.query(`SELECT locationid, latitude, longitude, title, description, icon_source, icon_color FROM map_locations WHERE idgroups=?`, [groupID]);
+            const json_output: {locationid: Number, latitude: Number, longitude: Number, title: String, description: String, icon_source: String, icon_color: String}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
             res.status(200).send({successful: true, results: json_output});
+        }
+        catch (err) {
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
+    }
+    else {
+        // Failed authentication
+        // 401 - Unauthorized
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
+    }
+});
+
+app.post("/deleteMarker", async function (req: any, res: any) {
+    const body: {
+        sessionID: string,
+        locationid: number
+    } = JSON.parse(req.body);
+    const userAuthenticated = await userAuth(body.sessionID);
+    if(userAuthenticated) {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`DELETE FROM map_locations WHERE locationid=?`, [body.locationid]);
+            res.status(200).send({successful: true});
         }
         catch (err) {
             res.status(500).send({successful: false, reason: "Internal server error!"});

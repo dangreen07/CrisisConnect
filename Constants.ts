@@ -4,7 +4,8 @@ export const theme = {
     textColor: "#04080F", // Ink Black
     primaryColor: '#04080F', // Ink Black
     navigatorColor: '#7EE8FA', // Pale Blue
-    newTaskColor: '#32CD32' // Light Green
+    newTaskColor: '#32CD32', // Light Green
+    deleteColor: '#f24444' // Red
 }
 
 export const api = {
