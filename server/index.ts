@@ -133,6 +133,8 @@ app.get('/getAnnouncements', async function (req: any, res: any){
     }
 });
 
+
+// Login and Signup Section
 app.post("/groupLogin", async function (req: any, res: any) {
     const body: {groupName: string, groupPass: string} = JSON.parse(req.body);
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
@@ -201,15 +203,16 @@ app.get("/userInfo", async function (req: any, res: any) {
     const sessionID = req.query.session_id;
     let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
     try {
-        const result = await con.query(`SELECT first_name, last_name, idgroups FROM users WHERE session_id=?`, [sessionID]);
+        const result = await con.query(`SELECT first_name, last_name, idgroups, username FROM users WHERE session_id=?`, [sessionID]);
         if(result[0].length != 0) {
             // Successful Login
-            const json_output: {first_name: string, last_name: string, idgroups: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
+            const json_output: {first_name: string, last_name: string, idgroups: string, username: string}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
             res.send({
                 successful: true,
                 first_name: json_output[0].first_name,
                 last_name: json_output[0].last_name,
-                group_id: json_output[0].idgroups
+                group_id: json_output[0].idgroups,
+                username: json_output[0].username
             });
         }
         else {
@@ -330,6 +333,55 @@ async function getGroupID(sessionID: string) {
     }
 }
 
+
+// Returns a number greater than zero if login credentials correct. Returns -1 if incorrect
+async function loginCheck(username: string, password: string): Promise<number> {
+    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+    try {
+        const result = await con.query(`SELECT users_id FROM users WHERE username=? AND password=?`, [username, password]);
+        if(result[0].length != 0) {
+            // Successful Login
+            const json_output: {users_id: number}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
+            return json_output[0].users_id;
+        }
+        else {
+            return -1; 
+        }
+    }
+    catch (err) {
+        console.log("ERROR => " + err);
+        return -1;
+    }
+    finally {
+        con.end();
+    }
+}
+
+app.post("/changePassword", async function (req: any, res: any) {
+    const body : {
+        username: string,
+        password: string,
+        newPassword: string
+    } = JSON.parse(req.body);
+    const loggedIn = await loginCheck(body.username, body.password);
+    if(loggedIn != -1) {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const result = await con.query(`UPDATE users SET password=? WHERE users_id=?`, [body.newPassword, loggedIn]);
+            res.status(200).send({successful: true});
+        }
+        catch (err) {
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
+    }
+    else {
+        res.status(401).send({successful: false, reason: "Wrong credentials!"});
+    }
+});
+
 // Map system
 
 app.post("/setRegion", async function (req: any, res: any) {
@@ -352,7 +404,7 @@ app.post("/setRegion", async function (req: any, res: any) {
             });
         }
         catch (err) {
-            res.status(500);
+            res.status(500).send({successful: false, reason: "Internal server error!"});
         }
         finally {
             con.end();

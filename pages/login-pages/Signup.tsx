@@ -34,7 +34,7 @@ export default function Signup({route, navigation}) {
             body: JSON.stringify({
                 firstName: firstName,
                 lastName: lastName,
-                username: username,
+                username: username.toLowerCase(),
                 password: hashedPassword,
                 groupId: groupId
             })
