@@ -54,7 +54,7 @@ export default function Signup({route, navigation}) {
             }
         }).catch(error => {
             console.log(error);
-        })
+        });
     }
 
     const signupAttempt = () => {

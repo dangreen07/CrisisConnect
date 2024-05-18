@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { SafeAreaView, View, StyleSheet, Image, TouchableOpacity, Alert } from "react-native";
-import MapView, { Details, Region } from "react-native-maps";
-import { api, theme } from "../Constants";
+import { SafeAreaView, View, StyleSheet, Image, TouchableOpacity, Alert, Text } from "react-native";
+import MapView, { Callout, Details, LatLng, LongPressEvent, Marker, PROVIDER_DEFAULT, Point, Region } from "react-native-maps";
+import { api, theme } from "../../Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import * as SplashScreen from 'expo-splash-screen';
-
-const saveIcon = require('../assets/save-icon.png');
+import { Icon } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +19,7 @@ export default function Map({navigation}) {
     });
     const isFocused = useIsFocused();
     const mapRef = useRef(null);
+    const [markers, setMarkers] = useState([]);
 
     const regionChanged = (region: Region, details: Details) => {
         setRegion(region);
@@ -118,17 +118,61 @@ export default function Map({navigation}) {
         ]);
     }
 
+    const addMarker = (event: LongPressEvent) => {
+        // TODO: Talk to the API about adding a marker
+        const {latitude, longitude} = (event.nativeEvent.coordinate);
+        navigation.navigate("AddMarker", {
+            latitude: latitude,
+            longitude: longitude
+        });
+    }
+
+    const getMarkers = () => {
+        fetch(`${api.address}/getMarkers?session_id=${global.sessionID}`, {
+            method: 'GET'
+        }).then(response => response.json()).then(json => {
+            if(json["successful"] == true) {
+                setMarkers(json["results"]);
+            }
+            else if (json["reason"] == "sessionID invalid!") {
+                // TODO: Logout user and send back to login page
+            }
+        }).catch(error => {
+            // TODO: Implement error handling
+            console.log(error);
+        });
+    }
+
     useEffect(() => {
         getInitialInfo();
+        getMarkers();
     }, [isFocused]);
 
     return (
         <View style={styles.container}>
             <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
-                <MapView style={styles.map} region={region} onRegionChange={regionChanged} mapType="hybrid" ref={mapRef}/>
+                <MapView style={styles.map} region={region} onRegionChange={regionChanged} mapType="hybrid" ref={mapRef} onLongPress={addMarker} provider={PROVIDER_DEFAULT}>
+                    {markers.map((marker, index) => (
+                        <Marker
+                            key={index}
+                            coordinate={{
+                                latitude: marker["latitude"],
+                                longitude: marker["longitude"],
+                            }}
+                            title={marker["title"]}
+                            description={marker["description"]}
+                        >
+                            <Icon
+                            size={50}
+                            source={marker["icon_source"]}
+                            color={marker["icon_color"]}
+                            />
+                        </Marker>
+                    ))}
+                </MapView>
             </SafeAreaView>
             <TouchableOpacity style={styles.saveMap} onPress={setMap}>
-                    <Image style={styles.saveImage} source={saveIcon} />
+                    <Icon source="content-save-outline" size={60} />
             </TouchableOpacity>
         </View>
     );
@@ -148,12 +192,7 @@ const styles = StyleSheet.create({
         bottom: 15,
         right: 15,
         backgroundColor: theme.newTaskColor,
-        borderRadius: 50,
+        borderRadius: 40,
         padding: 10,
-    },
-    saveImage: {
-        width: 80,
-        height: 80,
-        resizeMode: 'contain'
     }
 });

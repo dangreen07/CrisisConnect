@@ -8,9 +8,6 @@ import { useIsFocused } from '@react-navigation/native';
 import { SplashScreen } from 'expo-router';
 import { Icon } from 'react-native-paper';
 
-const addSymbol = require("../../assets/add.png");
-const reloadSymbol = require('../../assets/reload.png');
-
 SplashScreen.preventAutoHideAsync();
 
 export default function MainPage({navigation}) {

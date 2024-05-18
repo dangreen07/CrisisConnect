@@ -314,6 +314,24 @@ async function userAuth(sessionID: string): Promise<Boolean> {
     }
 }
 
+async function getGroupID(sessionID: string) {
+    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+    try {
+        const result = await con.query(`SELECT * FROM users WHERE session_id=?`, [sessionID]);
+        const groupID = result[0][0]["idgroups"];
+        return groupID;
+    }
+    catch (err) {
+        console.log("Error => " + err);
+        return 0;
+    }
+    finally {
+        con.end();
+    }
+}
+
+// Map system
+
 app.post("/setRegion", async function (req: any, res: any) {
     // Will use sessionID for authentication (especially important here as modifying data for the entire group)
     const body: {
@@ -347,22 +365,6 @@ app.post("/setRegion", async function (req: any, res: any) {
     }
 });
 
-async function getGroupID(sessionID: string) {
-    let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
-    try {
-        const result = await con.query(`SELECT * FROM users WHERE session_id=?`, [sessionID]);
-        const groupID = result[0][0]["idgroups"];
-        return groupID;
-    }
-    catch (err) {
-        console.log("Error => " + err);
-        return 0;
-    }
-    finally {
-        con.end();
-    }
-}
-
 app.post("/getRegion", async function (req: any, res: any) {
     const body: {
         sessionID: string
@@ -383,7 +385,64 @@ app.post("/getRegion", async function (req: any, res: any) {
             });
         }
         catch (err) {
-            res.status(500);
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
+    }
+    else {
+        // Failed authentication
+        // 401 - Unauthorized
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
+    }
+});
+
+app.post("/addMarker", async function (req: any, res: any) {
+    const body: {
+        sessionID: string,
+        latitude: number,
+        longitude: number,
+        title: string,
+        description: string,
+        iconSource: String,
+        iconColor: String
+    } = JSON.parse(req.body);
+    const userAuthenticated = await userAuth(body.sessionID);
+    if (userAuthenticated) {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const groupID = await getGroupID(body.sessionID);
+            const result = await con.query(`INSERT INTO map_locations (latitude, longitude, title, description, idgroups, icon_source, icon_color) VALUES (?, ?, ?, ?, ?, ?, ?)`, [body.latitude, body.longitude, body.title, body.description, groupID, body.iconSource, body.iconColor]);
+            res.status(200).send({successful: true});
+        }
+        catch (err) {
+            res.status(500).send({successful: false, reason: "Internal server error!"});
+        }
+        finally {
+            con.end();
+        }
+    }
+    else {
+        // Failed authentication
+        // 401 - Unauthorized
+        res.status(401).send({successful: false, reason: "sessionID invalid!"});
+    }
+});
+
+app.get("/getMarkers", async function (req: any, res: any) {
+    const sessionID = req.query.session_id;
+    const userAuthenticated = await userAuth(sessionID);
+    if(userAuthenticated) {
+        let con = mysql.createPool({...credentials, connectionLimit: 100, queueLimit: 0, waitForConnections: true});
+        try {
+            const groupID = await getGroupID(sessionID);
+            const result = await con.query(`SELECT latitude, longitude, title, description, icon_source, icon_color FROM map_locations WHERE idgroups=?`, [groupID]);
+            const json_output: {latitude: Number, longitude: Number, title: String, description: String, icon_source: String, icon_color: String}[] = Object.values(JSON.parse(JSON.stringify(result[0])));
+            res.status(200).send({successful: true, results:json_output});
+        }
+        catch (err) {
+            res.status(500).send({successful: false, reason: "Internal server error!"});
         }
         finally {
             con.end();
