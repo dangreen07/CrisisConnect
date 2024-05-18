@@ -6,9 +6,9 @@ import { SelectList } from "react-native-dropdown-select-list";
 
 export default function AddMarker({route, navigation}) {
     const {latitude, longitude} = route.params;
+
     const [markerTitle, setMarkerTitle] = useState("");
     const [markerDescription, setMarkerDescription] = useState("");
-
     const [selected, setSelected] = useState("");
 
     const markerIcon = {
@@ -20,7 +20,7 @@ export default function AddMarker({route, navigation}) {
     const data = [
         {key:'1', value:'Hospital'},
         {key:'2', value:'Base of Operations'},
-        {key:'3', value:'People Who Need Priority'}
+        {key:'3', value:'People Who Need Priority'},
     ]
 
     const backButton = () => {
@@ -58,10 +58,6 @@ export default function AddMarker({route, navigation}) {
             });
         }
     }
-
-    useEffect(() => {
-        console.log();
-    }, [selected]);
 
     return (
         <View style={styles.container}>

@@ -37,22 +37,22 @@ export default function MainPage({navigation}) {
   return (
     <View style={styles.container}>
       <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
-        <View style={styles.topbar}>
+        <View style={{flex: 1}}>
           <Text style={styles.title}>Current Tasks</Text>
           <TouchableOpacity style={styles.reloadButton} onPress={getTasksFromAPI}>
-            <Icon source="reload" size={40} />
+              <Icon source="reload" size={40} />
+          </TouchableOpacity>
+          <ScrollView>
+            {tasks.map((task) => {
+              return (
+                <TaskItem key={task.task_id} taskName={task.task_name} taskId={task.task_id} reloadFunction={getTasksFromAPI}/>
+              )
+            })}
+          </ScrollView>
+          <TouchableOpacity style={styles.addButton} onPress={addTask}>
+            <Icon source="plus" size={50} />
           </TouchableOpacity>
         </View>
-        <ScrollView>
-          {tasks.map((task) => {
-            return (
-              <TaskItem key={task.task_id} taskName={task.task_name} taskId={task.task_id} reloadFunction={getTasksFromAPI}/>
-            )
-          })}
-        </ScrollView>
-        <TouchableOpacity style={styles.addButton} onPress={addTask}>
-          <Icon source="plus" size={50} />
-        </TouchableOpacity>
       </SafeAreaView>
       <StatusBar style="auto"/>
     </View>
@@ -77,8 +77,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   reloadButton:{
-    padding: 5,
     marginRight: 10,
+    position: 'absolute',
+    right: 5,
+    top: 0,
   },
   addButton: {
     position: 'absolute',
