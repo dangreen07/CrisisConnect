@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import * as SplashScreen from 'expo-splash-screen';
 import { Icon } from "react-native-paper";
+import * as Location from 'expo-location';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +21,10 @@ export default function Map({navigation}) {
     const isFocused = useIsFocused();
     const mapRef = useRef(null);
     const [markers, setMarkers] = useState([]);
+
+    const [location, setLocation] = useState(null);
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [userLocations, setUserLocations] = useState([]);
 
     const regionChanged = (region: Region, details: Details) => {
         setRegion(region);
@@ -148,6 +153,76 @@ export default function Map({navigation}) {
         getMarkers();
     }, [isFocused]);
 
+    const shareCurrentLocation = (currentLocation: Location.LocationObject) => {
+        if(currentLocation !== null) {
+            fetch(`${api.address}/setPersonLocation`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sessionID: global.sessionID,
+                    latitude: currentLocation.coords.latitude,
+                    longitude: currentLocation.coords.longitude,
+                    timestamp: currentLocation.timestamp,
+                })
+            }).then(response => response.json()).then(json => {
+                if(json["successful"] == true) {
+                    // TODO: Handle successful share of location
+                }
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+    }
+
+    const getLocation = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+  
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
+        return location;
+    }
+
+    const setupLocation = async () => {
+        console.log("Timer Started!");
+        getGroupsLocations();
+        const currentLocation = await getLocation();
+        shareCurrentLocation(currentLocation);
+        const interval = setInterval(async () => {
+            const currentLocation = await getLocation();
+            shareCurrentLocation(currentLocation);
+            getGroupsLocations();
+        }, 60000); // Runs every 60 seconds
+        
+        return () => clearInterval(interval);
+    }
+
+    const getGroupsLocations = () => {
+        fetch(`${api.address}/getPeopleLocations?session_id=${global.sessionID}`, {
+            method: 'GET'
+        }).then(response => response.json()).then(json => {
+            if(json["successful"] == true) {
+                setUserLocations(json["results"]);
+            }
+            else if (json["reason"] == "sessionID invalid!") {
+                // TODO: Logout user and send back to login page
+            }
+        }).catch(error => {
+            // TODO: Implement error handling
+            console.log(error);
+        });
+    }
+
+    useEffect(() => {
+        setupLocation();
+      }, []);
+
     return (
         <View style={styles.container}>
             <SafeAreaView style={{flex: 1, width: '100%', margin: 'auto'}}>
@@ -167,6 +242,23 @@ export default function Map({navigation}) {
                             source={marker["icon_source"]}
                             color={marker["icon_color"]}
                             />
+                        </Marker>
+                    ))}
+                    {userLocations.map((user, index) => (
+                        user["latitude"] !== null &&
+                        <Marker
+                            key={index}
+                            coordinate={{
+                                latitude: user["latitude"],
+                                longitude: user["longitude"],
+                            }}
+                            title={user["first_name"]+" "+user["last_name"]}
+                            description=""
+                        >
+                            <Icon
+                            size={30}
+                            source="account"
+                            color="black" />
                         </Marker>
                     ))}
                 </MapView>

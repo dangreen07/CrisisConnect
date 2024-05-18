@@ -39,7 +39,8 @@
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.10",
     "rn-nodeify": "^10.3.0",
-    "typescript": "~5.3.3"
+    "typescript": "~5.3.3",
+    "expo-location": "~17.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
